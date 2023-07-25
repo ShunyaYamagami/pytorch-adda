@@ -8,8 +8,9 @@ import torch.backends.cudnn as cudnn
 from torch.autograd import Variable
 
 import params
-from datasets import get_mnist, get_usps
-
+from datasets import get_mnist, get_usps, get_office, get_home
+import logging
+logger = logging.getLogger(__name__)
 
 def make_variable(tensor, volatile=False):
     """Convert Tensor to Variable."""
@@ -48,19 +49,23 @@ def init_random_seed(manual_seed):
         seed = random.randint(1, 10000)
     else:
         seed = manual_seed
-    print("use random seed: {}".format(seed))
+    logger.info("use random seed: {}".format(seed))
     random.seed(seed)
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
 
-def get_data_loader(name, train=True):
+def get_data_loader(name, text_path, train=True):
     """Get data loader by name."""
     if name == "MNIST":
         return get_mnist(train)
     elif name == "USPS":
         return get_usps(train)
+    elif name == "Office31":
+        return get_office(text_path, train)
+    elif name == "OfficeHome":
+        return get_home(text_path, train)
 
 
 def init_model(net, restore):
@@ -72,7 +77,7 @@ def init_model(net, restore):
     if restore is not None and os.path.exists(restore):
         net.load_state_dict(torch.load(restore))
         net.restored = True
-        print("Restore model from: {}".format(os.path.abspath(restore)))
+        logger.info("Restore model from: {}".format(os.path.abspath(restore)))
 
     # check if cuda is available
     if torch.cuda.is_available():
@@ -88,5 +93,5 @@ def save_model(net, filename):
         os.makedirs(params.model_root)
     torch.save(net.state_dict(),
                os.path.join(params.model_root, filename))
-    print("save pretrained model to: {}".format(os.path.join(params.model_root,
+    logger.info("save pretrained model to: {}".format(os.path.join(params.model_root,
                                                              filename)))

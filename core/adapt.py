@@ -1,14 +1,16 @@
 """Adversarial adaptation to train target encoder."""
 
 import os
-
+import numpy as np
 import torch
 import torch.optim as optim
 from torch import nn
+from tqdm import tqdm
 
 import params
 from utils import make_variable
-
+import logging
+logger = logging.getLogger(__name__)
 
 def train_tgt(src_encoder, tgt_encoder, critic,
               src_data_loader, tgt_data_loader):
@@ -35,10 +37,12 @@ def train_tgt(src_encoder, tgt_encoder, critic,
     # 2. train network #
     ####################
 
-    for epoch in range(params.num_epochs):
+    best_acc = 0.0
+    for epoch in tqdm(range(params.num_epochs)):
         # zip source and target data pair
+        accs = torch.Tensor()
         data_zip = enumerate(zip(src_data_loader, tgt_data_loader))
-        for step, ((images_src, _), (images_tgt, _)) in data_zip:
+        for step, ((images_src, _, domain_src), (images_tgt, _, domain_tgt)) in data_zip:
             ###########################
             # 2.1 train discriminator #
             ###########################
@@ -59,9 +63,10 @@ def train_tgt(src_encoder, tgt_encoder, critic,
             pred_concat = critic(feat_concat.detach())
 
             # prepare real and fake label
-            label_src = make_variable(torch.ones(feat_src.size(0)).long())
-            label_tgt = make_variable(torch.zeros(feat_tgt.size(0)).long())
-            label_concat = torch.cat((label_src, label_tgt), 0)
+            # label_src = make_variable(torch.ones(feat_src.size(0)).long())
+            # label_tgt = make_variable(torch.zeros(feat_tgt.size(0)).long())
+            # label_concat = torch.cat((label_src, label_tgt), 0)
+            label_concat = make_variable(torch.cat([domain_src.squeeze_(), domain_tgt.squeeze_()], dim=0))
 
             # compute loss for critic
             loss_critic = criterion(pred_concat, label_concat)
@@ -71,7 +76,8 @@ def train_tgt(src_encoder, tgt_encoder, critic,
             optimizer_critic.step()
 
             pred_cls = torch.squeeze(pred_concat.max(1)[1])
-            acc = (pred_cls == label_concat).float().mean()
+            # acc = (pred_cls == label_concat).float().mean()
+            accs = torch.cat([accs, (pred_cls == label_concat).long().cpu()])
 
             ############################
             # 2.2 train target encoder #
@@ -100,32 +106,34 @@ def train_tgt(src_encoder, tgt_encoder, critic,
             #######################
             # 2.3 print step info #
             #######################
-            if ((step + 1) % params.log_step == 0):
-                print("Epoch [{}/{}] Step [{}/{}]:"
-                      "d_loss={:.5f} g_loss={:.5f} acc={:.5f}"
-                      .format(epoch + 1,
-                              params.num_epochs,
-                              step + 1,
-                              len_data_loader,
-                              loss_critic.data[0],
-                              loss_tgt.data[0],
-                              acc.data[0]))
+        acc_epoch = torch.mean(accs)
+        if best_acc < acc_epoch:
+            best_acc = acc_epoch
+            with open(os.path.join(params.log_dir, 'best.txt'), 'w') as f:
+                f.write(f'Epoch: {epoch:4d}  {best_acc:.3f}')
+        if ((epoch + 1) % params.log_per_epoch == 0):
+            logger.info("Epoch [{:4d}/{:4d}] \td_loss={:.3}\tg_loss={:.3} \tacc={:.3f}"
+                    .format(epoch + 1,
+                            params.num_epochs,
+                            loss_critic,
+                            loss_tgt,
+                            acc_epoch))
 
         #############################
         # 2.4 save model parameters #
         #############################
-        if ((epoch + 1) % params.save_step == 0):
-            torch.save(critic.state_dict(), os.path.join(
-                params.model_root,
-                "ADDA-critic-{}.pt".format(epoch + 1)))
-            torch.save(tgt_encoder.state_dict(), os.path.join(
-                params.model_root,
-                "ADDA-target-encoder-{}.pt".format(epoch + 1)))
+        # if ((epoch + 1) % params.save_step == 0):
+        #     torch.save(critic.state_dict(), os.path.join(
+        #         params.model_root,
+        #         "ADDA-critic-{}.pt".format(epoch + 1)))
+        #     torch.save(tgt_encoder.state_dict(), os.path.join(
+        #         params.model_root,
+        #         "ADDA-target-encoder-{}.pt".format(epoch + 1)))
 
-    torch.save(critic.state_dict(), os.path.join(
-        params.model_root,
-        "ADDA-critic-final.pt"))
-    torch.save(tgt_encoder.state_dict(), os.path.join(
-        params.model_root,
-        "ADDA-target-encoder-final.pt"))
+    # torch.save(critic.state_dict(), os.path.join(
+    #     params.model_root,
+    #     "ADDA-critic-final.pt"))
+    # torch.save(tgt_encoder.state_dict(), os.path.join(
+    #     params.model_root,
+    #     "ADDA-target-encoder-final.pt"))
     return tgt_encoder

@@ -110,7 +110,7 @@ def train_tgt(src_encoder, tgt_encoder, critic,
         if best_acc < acc_epoch:
             best_acc = acc_epoch
             with open(os.path.join(params.log_dir, 'best.txt'), 'w') as f:
-                f.write(f'Epoch: {epoch:4d}  {best_acc:.3f}')
+                f.write(f'Epoch: {epoch}  {best_acc:.3f}')
         if ((epoch + 1) % params.log_per_epoch == 0):
             logger.info("Epoch [{:4d}/{:4d}] \td_loss={:.3}\tg_loss={:.3} \tacc={:.3f}"
                     .format(epoch + 1,

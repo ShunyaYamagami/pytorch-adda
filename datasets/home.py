@@ -32,9 +32,8 @@ class HomeDataset(data.Dataset):
             self.train_data = self.train_data[indices[0:self.dataset_size]]
             self.train_labels = self.train_labels[indices[0:self.dataset_size]]
             self.train_domains = self.train_domains[indices[0:self.dataset_size]]
-        self.train_data *= 255.0
-        self.train_data = self.train_data.transpose(
-            (0, 2, 3, 1))  # convert to HWC
+        # self.train_data *= 255.0
+        # self.train_data = self.train_data.transpose((0, 2, 3, 1))  # convert to HWC
 
     def __getitem__(self, index):
         img, label, domain = self.train_data[index], self.train_labels[index], self.train_domains[index]
@@ -50,9 +49,9 @@ class HomeDataset(data.Dataset):
 
     def load_samples(self):
         """Load sample images from dataset."""
-        with open(self.text_path, "rb") as f:
+        with open(self.text_path, "r") as f:
             lines = f.readlines()
-            lines = np.array([l.split(' ') for l in lines])
+            lines = np.array([l.split(' ') for l in lines], dtype=np.object_)
         paths = lines[:, 0]
         images = [transforms.ToTensor()(Image.open(os.path.join(self.root, path))) for path in paths]
         labels = lines[:, 1].astype(np.int32)

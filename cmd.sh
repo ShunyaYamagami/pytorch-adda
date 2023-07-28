@@ -7,13 +7,22 @@ function process_args {
     shift 3  # 無名引数数
 
     # 残りの名前付き引数を解析
-    local parent="Office31"  # データセット名のデフォルト値
-    local task=(
-        # "original_uda"
-        "true_domains"
-        "simclr_bs512_ep300_g3_shfl"
-        "simclr_rpl_uniform_dim512_wght0.5_bs512_ep300_g3_encoder_outdim64_shfl"
-    )
+    local parent="OfficeHome"
+    if [ $parent = 'Office31' ]; then
+        local task=(
+            # "original_uda"
+            "true_domains"
+            # "simclr_rpl_uniform_dim512_wght0.5_bs512_ep300_g3_encoder_outdim64_shfl"
+            # "simclr_bs512_ep300_g3_shfl"
+        )
+    elif [ $parent = 'OfficeHome' ]; then
+        local task=(
+            # "original_uda"
+            "true_domains"
+            "simclr_rpl_uniform_dim512_wght0.5_bs512_ep300_g3_encoder_outdim64_shfl"
+            "simclr_bs512_ep300_g3_shfl"
+        )
+    fi
     
     local params=$(getopt -n "$0" -o p:t: -l parent:,task: -- "$@")
     eval set -- "$params"

@@ -71,7 +71,7 @@ function process_args {
     
     ###################################################
     COMMAND="conda deactivate && conda deactivate "
-    COMMAND+=" && conda activate cdan "
+    COMMAND+=" && conda activate tvt "
     for tsk in "${task[@]}"; do
         if [ $dset_num -eq -1 ]; then
             for dset in "${dsetlist[@]}"; do

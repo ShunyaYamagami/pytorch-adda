@@ -20,7 +20,7 @@ set_determinism()
 
 # params for dataset and data loader
 data_root = "/nas/data/syamagami/GDA/data"
-text_root = f"data/{parent}/{task}/{dset}"
+text_root = f"/nas/data/syamagami/GDA/data/GDA_DA_methods/data/{parent}/{task}/{dset}"
 labeled_filename = os.path.join(text_root, 'labeled.txt')
 unlabeled_filename = os.path.join(text_root, 'unlabeled.txt')
 test0_filename = os.path.join(text_root, f'test_{fulld0}.txt')

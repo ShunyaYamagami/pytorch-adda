@@ -77,9 +77,16 @@ def get_office(text_path, train):
                         text_path=text_path,
                         transform=pre_process,)
 
-    usps_data_loader = torch.utils.data.DataLoader(
-        dataset=usps_dataset,
-        batch_size=params.batch_size,
-        shuffle=True)
+    if train:
+        usps_data_loader = torch.utils.data.DataLoader(
+            dataset=usps_dataset,
+            batch_size=params.batch_size,
+            drop_last=True,
+            shuffle=True)
+    else:
+        usps_data_loader = torch.utils.data.DataLoader(
+            dataset=usps_dataset,
+            batch_size=params.batch_size,
+            shuffle=True)
 
     return usps_data_loader

@@ -7,25 +7,7 @@ function process_args {
     shift 3  # 無名引数数
 
     # 残りの名前付き引数を解析
-    local parent="OfficeHome"
-    if [ $parent = 'Office31' ]; then
-        local task=(
-            # "original_uda"
-            # "true_domains"
-            # "simclr_rpl_uniform_dim512_wght0.5_bs512_ep300_g3_encoder_outdim64_shfl"
-            # "simclr_bs512_ep300_g3_shfl"
-            "simple_bs512_ep300_g3_AE_outd64_shfl"
-            "contrastive_rpl_dim512_wght0.6_AE_bs256_ep300_outd64_g3"
-        )
-    elif [ $parent = 'OfficeHome' ]; then
-        local task=(
-            # "original_uda"
-            "true_domains"
-            "simclr_rpl_uniform_dim512_wght0.5_bs512_ep300_g3_encoder_outdim64_shfl"
-            "simclr_bs512_ep300_g3_shfl"
-        )
-    fi
-    
+    local parent="OfficeHome"    
     local params=$(getopt -n "$0" -o p:t: -l parent:,task: -- "$@")
     eval set -- "$params"
 
@@ -49,6 +31,25 @@ function process_args {
                 ;;
         esac
     done
+
+    if [ $parent = 'Office31' ]; then
+        local task=(
+            # "original_uda"
+            # "true_domains"
+            # "simclr_rpl_uniform_dim512_wght0.5_bs512_ep300_g3_encoder_outdim64_shfl"
+            # "simclr_bs512_ep300_g3_shfl"
+            # "simple_bs512_ep300_g3_AE_outd64_shfl"
+            "contrastive_rpl_dim512_wght0.6_AE_bs256_ep300_outd64_g3"
+        )
+    elif [ $parent = 'OfficeHome' ]; then
+        local task=(
+            # "original_uda"
+            "true_domains"
+            "simclr_rpl_dim128_wght0.5_bs512_ep3000_g3_encoder_outdim64_shfl"
+            # "simclr_bs512_ep1000_g3_shfl"
+        )
+    fi
+
     echo "gpu_i: $gpu_i"
     echo "exec_num: $exec_num"
     echo "dset_num: $dset_num"

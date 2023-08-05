@@ -9,8 +9,7 @@ create_env:
 	@echo "Creating environment..."
 	conda create --name $(ENV_NAME) python=$(PYTHON_VERSION)  -y
 	@echo "Installing python dependencies..."
-	conda run -n $(ENV_NAME) conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch-nightly -c nvidia -y
-
+	conda run -n $(ENV_NAME) conda install -y pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
 	conda run -n $(ENV_NAME) pip install -r ./requirements.txt
 
 

@@ -8,7 +8,9 @@ function process_args {
 
     # 残りの名前付き引数を解析
     local parent="OfficeHome"    
-    local params=$(getopt -n "$0" -o p:t: -l parent:,task: -- "$@")
+    local task_temp=""    
+    local tmux_session=""
+    local params=$(getopt -n "$0" -o p:t: -l parent:,task:,tmux: -- "$@")
     eval set -- "$params"
 
     while true; do
@@ -17,10 +19,14 @@ function process_args {
                 parent="$2"
                 shift 2
                 ;;
-            # -t|--task)
-            #     task="$2"
-            #     shift 2
-            #     ;;
+            -t|--task)
+                task_temp="$2"
+                shift 2
+                ;;
+            --tmux)
+                tmux_session="$2"
+                shift 2
+                ;;
             --)
                 shift
                 break
@@ -45,9 +51,12 @@ function process_args {
         local task=(
             # "original_uda"
             "true_domains"
-            "simclr_rpl_dim128_wght0.5_bs512_ep3000_g3_encoder_outdim64_shfl"
+            # "simclr_rpl_dim128_wght0.5_bs512_ep3000_g3_encoder_outdim64_shfl"
             # "simclr_bs512_ep1000_g3_shfl"
         )
+    fi
+    if [ ! -z "$task_temp" ]; then
+        task=("$task_temp")
     fi
 
     echo "gpu_i: $gpu_i"
@@ -88,7 +97,15 @@ function process_args {
     ###### 実行. 
     echo $COMMAND
     echo ''
-    eval $COMMAND
+
+    if [ -n "$tmux_session" ]; then
+        # 第3引数が存在する場合の処理. tmux内で実行する. $tmux_sessionはtmuxのセッション名.
+        tmux -2 new -d -s $tmux_session
+        tmux send-key -t $tmux_session.0 "$COMMAND" ENTER
+    else
+        # 第3引数が存在しない場合の処理. そのまま実行.
+        eval $COMMAND
+    fi
 }
 
 ####################################################

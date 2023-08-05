@@ -1,3 +1,9 @@
 # torch
 # torchvision
+scikit-learn
+scipy
+matplotlib
+numpy
+Pillow
+tqdm
 termcolor

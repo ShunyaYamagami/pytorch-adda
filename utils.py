@@ -8,7 +8,8 @@ import torch.backends.cudnn as cudnn
 from torch.autograd import Variable
 
 import params
-from datasets import get_mnist, get_usps, get_office, get_home
+# from datasets import get_mnist, get_usps, get_office, get_home
+from datasets import get_mnist, get_usps, get_office
 import logging
 logger = logging.getLogger(__name__)
 
@@ -65,7 +66,7 @@ def get_data_loader(name, text_path, train=True):
     elif name == "Office31":
         return get_office(text_path, train)
     elif name == "OfficeHome":
-        return get_home(text_path, train)
+        return get_office(text_path, train)
 
 
 def init_model(net, restore):
@@ -74,10 +75,10 @@ def init_model(net, restore):
     net.apply(init_weights)
 
     # restore model weights
-    if restore is not None and os.path.exists(restore):
-        net.load_state_dict(torch.load(restore))
-        net.restored = True
-        logger.info("Restore model from: {}".format(os.path.abspath(restore)))
+    # if restore is not None and os.path.exists(restore):
+    #     net.load_state_dict(torch.load(restore))
+    #     net.restored = True
+    #     logger.info("Restore model from: {}".format(os.path.abspath(restore)))
 
     # check if cuda is available
     if torch.cuda.is_available():

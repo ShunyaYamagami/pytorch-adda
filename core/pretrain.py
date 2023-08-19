@@ -69,12 +69,12 @@ def train_src_step(epoch, encoder, classifier, data_loader, optimizer, criterion
         loss.backward()
         optimizer.step()
 
-        # print step info
-        if ((epoch + 1) % params.log_per_epoch == 0):
-            logger.info("Epoch [{}/{}]: loss={}"
-                    .format(epoch + 1,
-                            params.num_epochs_pre,
-                            loss))
+    # print step info
+    if ((epoch + 1) % params.log_per_epoch == 0):
+        logger.info("Epoch [{}/{}]: loss={}"
+                .format(epoch + 1,
+                        params.num_epochs_pre,
+                        loss))
 
 
 def eval_src(encoder, classifier, data_loader):

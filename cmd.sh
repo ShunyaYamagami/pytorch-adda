@@ -91,6 +91,13 @@ function process_args {
             for dset in "${dsetlist[@]}"; do
                 COMMAND+=" && CUDA_VISIBLE_DEVICES=$gpu_i  exec_num=$exec_num  python  main.py  --parent $parent --dset $dset  --task $tsk"
             done
+        elif [[ $dset_num == *"_"* ]]; then  # アンダーラインが含まれているかチェック
+            # アンダーラインで文字列を分割
+            IFS='_' read -r -a dset_num_list <<< "$dset_num"
+            for num in "${dset_num_list[@]}"; do
+                dset=${dsetlist[$num]}
+                COMMAND+=" &&  CUDA_VISIBLE_DEVICES=$gpu_i  exec_num=$exec_num  python  main.py  --parent $parent --dset $dset  --task $tsk"
+            done
         else
             dset=${dsetlist[$dset_num]}
             COMMAND+=" &&  CUDA_VISIBLE_DEVICES=$gpu_i  exec_num=$exec_num  python  main.py  --parent $parent --dset $dset  --task $tsk"

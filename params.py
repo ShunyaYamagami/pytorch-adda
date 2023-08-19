@@ -35,8 +35,13 @@ image_size = 64
 
 if parent == 'Office31':
     num_classes = 31
+    log_per_epoch = 10
 elif parent == 'OfficeHome':
     num_classes = 65
+    log_per_epoch = 10
+elif parent == 'DomainNet':
+    num_classes = 345
+    log_per_epoch = 1
 else:
     raise ValueError(f'parent: {parent}')
 
@@ -75,7 +80,7 @@ eval_step_pre = 20
 save_step_pre = 100
 num_epochs = 2000
 log_step = 100
-log_per_epoch = 10
+# log_per_epoch = 10
 save_step = 100
 manual_seed = None
 

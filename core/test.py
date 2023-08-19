@@ -20,16 +20,17 @@ def eval_tgt(encoder, classifier, data_loader):
     criterion = nn.CrossEntropyLoss()
 
     # evaluate network
-    for (images, labels, _) in data_loader:
-        images = make_variable(images, volatile=True)
-        labels = make_variable(labels).squeeze_()
+    with torch.no_grad():
+        for (images, labels, _) in data_loader:
+            images = make_variable(images, volatile=True)
+            labels = make_variable(labels).squeeze_()
 
-        preds = classifier(encoder(images))
-        # loss += criterion(preds, labels).data[0]
-        loss += criterion(preds, labels)
+            preds = classifier(encoder(images))
+            # loss += criterion(preds, labels).data[0]
+            loss += criterion(preds, labels)
 
-        pred_cls = preds.data.max(1)[1]
-        acc += pred_cls.eq(labels.data).cpu().sum()
+            pred_cls = preds.data.max(1)[1]
+            acc += pred_cls.eq(labels.data).cpu().sum()
 
     loss /= len(data_loader)
     acc /= len(data_loader.dataset)

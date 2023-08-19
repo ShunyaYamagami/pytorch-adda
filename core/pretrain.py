@@ -1,5 +1,5 @@
 """Pre-train encoder and classifier for source dataset."""
-
+import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
@@ -32,29 +32,7 @@ def train_src(encoder, classifier, data_loader):
     ####################
 
     for epoch in tqdm(range(params.num_epochs_pre)):
-        for step, (images, labels, _) in enumerate(data_loader):
-            # make images and labels variable
-            images = make_variable(images)
-            labels = make_variable(labels.squeeze_())
-
-            # zero gradients for optimizer
-            optimizer.zero_grad()
-
-            # compute loss for critic
-            preds = classifier(encoder(images))
-            # preds = F.softmax(preds, dim=-1).max()
-            loss = criterion(preds, labels)
-
-            # optimize source classifier
-            loss.backward()
-            optimizer.step()
-
-        # print step info
-        if ((epoch + 1) % params.log_per_epoch == 0):
-            logger.info("Epoch [{}/{}]: loss={}"
-                    .format(epoch + 1,
-                            params.num_epochs_pre,
-                            loss))
+        train_src_step(epoch, encoder, classifier, data_loader, optimizer, criterion)
 
         # eval model on test set
         if ((epoch + 1) % params.eval_step_pre == 0):
@@ -73,6 +51,32 @@ def train_src(encoder, classifier, data_loader):
     return encoder, classifier
 
 
+def train_src_step(epoch, encoder, classifier, data_loader, optimizer, criterion):
+    for step, (images, labels, _) in enumerate(data_loader):
+        # make images and labels variable
+        images = make_variable(images)
+        labels = make_variable(labels.squeeze_())
+
+        # zero gradients for optimizer
+        optimizer.zero_grad()
+
+        # compute loss for critic
+        preds = classifier(encoder(images))
+        # preds = F.softmax(preds, dim=-1).max()
+        loss = criterion(preds, labels)
+
+        # optimize source classifier
+        loss.backward()
+        optimizer.step()
+
+        # print step info
+        if ((epoch + 1) % params.log_per_epoch == 0):
+            logger.info("Epoch [{}/{}]: loss={}"
+                    .format(epoch + 1,
+                            params.num_epochs_pre,
+                            loss))
+
+
 def eval_src(encoder, classifier, data_loader):
     """Evaluate classifier for source domain."""
     # set eval state for Dropout and BN layers
@@ -87,19 +91,20 @@ def eval_src(encoder, classifier, data_loader):
     criterion = nn.CrossEntropyLoss()
 
     # evaluate network
-    for (images, labels, _) in data_loader:
-        images = make_variable(images, volatile=True)
-        # labels = make_variable(labels)
-        labels = make_variable(labels.squeeze_())
+    with torch.no_grad():
+        for (images, labels, _) in data_loader:
+            images = make_variable(images, volatile=True)
+            # labels = make_variable(labels)
+            labels = make_variable(labels.squeeze_())
 
-        preds = classifier(encoder(images))
-        # loss += criterion(preds, labels).data[0]
-        loss += criterion(preds, labels)
+            preds = encoder(images)
+            preds = classifier(preds)
+            loss += criterion(preds, labels)
 
-        pred_cls = preds.data.max(1)[1]
-        acc += pred_cls.eq(labels.data).cpu().sum()
+            pred_cls = preds.data.max(1)[1]
+            acc += pred_cls.eq(labels.data).cpu().sum()
 
-    loss /= len(data_loader)
-    acc /= len(data_loader.dataset)
+        loss /= len(data_loader)
+        acc /= len(data_loader.dataset)
 
     logger.info("Avg Loss = {}, Avg Accuracy = {:2%}".format(loss, acc))

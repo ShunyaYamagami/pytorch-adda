@@ -67,6 +67,8 @@ def get_data_loader(name, text_path, train=True):
         return get_office(text_path, train)
     elif name == "OfficeHome":
         return get_office(text_path, train)
+    elif name == "DomainNet":
+        return get_office(text_path, train)
 
 
 def init_model(net, restore):

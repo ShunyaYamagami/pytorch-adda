@@ -12,8 +12,8 @@ from utils import make_variable
 import logging
 logger = logging.getLogger(__name__)
 
-def train_tgt(src_encoder, tgt_encoder, critic,
-              src_data_loader, tgt_data_loader):
+def train_tgt(src_encoder:nn.Module, tgt_encoder:nn.Module, critic,
+              src_data_loader, tgt_data_loader, checkpoint_path, resume=''):
     """Train encoder for target domain."""
     ####################
     # 1. setup network #
@@ -38,7 +38,17 @@ def train_tgt(src_encoder, tgt_encoder, critic,
     ####################
 
     best_acc = 0.0
-    for epoch in tqdm(range(params.num_epochs)):
+    start_epoch = 0
+    if resume:
+        checkpoints = torch.load(checkpoint_path)
+        src_encoder.load_state_dict(checkpoints['src_encoder'])
+        tgt_encoder.load_state_dict(checkpoints['tgt_encoder'])
+        optimizer_critic.load_state_dict(checkpoints['optimizer_critic'])
+        optimizer_tgt.load_state_dict(checkpoints['optimizer_tgt'])
+        start_epoch = checkpoints['epoch']
+        best_acc = checkpoints['best_acc']
+
+    for epoch in tqdm(range(start_epoch, params.num_epochs)):
         # zip source and target data pair
         accs = torch.Tensor()
         data_zip = enumerate(zip(src_data_loader, tgt_data_loader))
@@ -103,9 +113,9 @@ def train_tgt(src_encoder, tgt_encoder, critic,
             # optimize target encoder
             optimizer_tgt.step()
 
-            #######################
-            # 2.3 print step info #
-            #######################
+        #######################
+        # 2.3 print epoch info #
+        #######################
         acc_epoch = torch.mean(accs)
         if best_acc < acc_epoch:
             best_acc = acc_epoch
@@ -122,18 +132,14 @@ def train_tgt(src_encoder, tgt_encoder, critic,
         #############################
         # 2.4 save model parameters #
         #############################
-        # if ((epoch + 1) % params.save_step == 0):
-        #     torch.save(critic.state_dict(), os.path.join(
-        #         params.model_root,
-        #         "ADDA-critic-{}.pt".format(epoch + 1)))
-        #     torch.save(tgt_encoder.state_dict(), os.path.join(
-        #         params.model_root,
-        #         "ADDA-target-encoder-{}.pt".format(epoch + 1)))
+        if ((epoch + 1) % params.log_ckpt_per_epoch == 0) or (epoch == params.num_epochs - 1):
+            torch.save({
+                'src_encoder': src_encoder.state_dict(),
+                'tgt_encoder': tgt_encoder.state_dict(),
+                'optimizer_critic': optimizer_critic.state_dict(),
+                'optimizer_tgt': optimizer_tgt.state_dict(),
+                'epoch': epoch,
+                'best_acc': best_acc,
+                }, checkpoint_path)
 
-    # torch.save(critic.state_dict(), os.path.join(
-    #     params.model_root,
-    #     "ADDA-critic-final.pt"))
-    # torch.save(tgt_encoder.state_dict(), os.path.join(
-    #     params.model_root,
-    #     "ADDA-target-encoder-final.pt"))
     return tgt_encoder

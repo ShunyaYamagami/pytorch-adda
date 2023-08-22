@@ -45,7 +45,7 @@ image_size = 64
 if parent == 'Office31':
     num_classes = 31
     log_per_epoch = 10
-    log_ckpt_per_epoch = 2
+    log_ckpt_per_epoch = 1000
 elif parent == 'OfficeHome':
     num_classes = 65
     log_per_epoch = 10

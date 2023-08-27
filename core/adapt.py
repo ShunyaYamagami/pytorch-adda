@@ -117,6 +117,7 @@ def train_tgt(src_encoder:nn.Module, tgt_encoder:nn.Module, critic,
         # 2.3 print epoch info #
         #######################
         acc_epoch = torch.mean(accs)
+        acc_epoch = round(float(acc_epoch), 3)
         if best_acc < acc_epoch:
             best_acc = acc_epoch
             with open(os.path.join(params.log_dir, 'best.txt'), 'w') as f:

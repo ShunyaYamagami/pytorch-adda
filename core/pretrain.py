@@ -38,15 +38,15 @@ def train_src(encoder, classifier, data_loader):
         if ((epoch + 1) % params.eval_step_pre == 0):
             eval_src(encoder, classifier, data_loader)
 
-        # save model parameters
-        if ((epoch + 1) % params.save_step_pre == 0):
-            save_model(encoder, "ADDA-source-encoder-{}.pt".format(epoch + 1))
-            save_model(
-                classifier, "ADDA-source-classifier-{}.pt".format(epoch + 1))
+    #     # save model parameters
+    #     if ((epoch + 1) % params.save_step_pre == 0):
+    #         save_model(encoder, "ADDA-source-encoder-{}.pt".format(epoch + 1))
+    #         save_model(
+    #             classifier, "ADDA-source-classifier-{}.pt".format(epoch + 1))
 
-    # # save final model
-    save_model(encoder, "ADDA-source-encoder-final.pt")
-    save_model(classifier, "ADDA-source-classifier-final.pt")
+    # # # save final model
+    # save_model(encoder, "ADDA-source-encoder-final.pt")
+    # save_model(classifier, "ADDA-source-classifier-final.pt")
 
     return encoder, classifier
 

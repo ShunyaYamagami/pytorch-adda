@@ -2,8 +2,10 @@
 
 import params
 from core import eval_src, eval_tgt, train_src, train_tgt
-from models import Discriminator, LeNetClassifier, LeNetEncoder
+# from models import Discriminator, LeNetClassifier, LeNetEncoder
+from util import get_model
 from utils import get_data_loader, init_model, init_random_seed
+import copy
 
 import logging
 logger = logging.getLogger(__name__)
@@ -19,16 +21,8 @@ if __name__ == '__main__':
     tgt_data_loader_eval = get_data_loader(params.parent, params.test1_filename, train=False)
 
     # load models
-    src_encoder = init_model(net=LeNetEncoder(),
-                             restore=params.src_encoder_restore)
-    src_classifier = init_model(net=LeNetClassifier(params.num_classes),
-                                restore=params.src_classifier_restore)
-    tgt_encoder = init_model(net=LeNetEncoder(),
-                             restore=params.tgt_encoder_restore)
-    critic = init_model(Discriminator(input_dims=params.d_input_dims,
-                                      hidden_dims=params.d_hidden_dims,
-                                      output_dims=params.d_output_dims),
-                        restore=params.d_model_restore)
+    feature_extractor, src_classifier, critic = get_model(params, use_weights=True)
+    src_encoder, tgt_encoder = copy.deepcopy(feature_extractor), copy.deepcopy(feature_extractor)
 
     if not params.resume:
         # train source model

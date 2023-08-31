@@ -57,6 +57,10 @@ def train_tgt(src_encoder:nn.Module, tgt_encoder:nn.Module, critic,
             # 2.1 train discriminator #
             ###########################
 
+            # setup hyperparameters
+            p = float(step + epoch * len(src_data_loader)) / params.num_epochs * len(src_data_loader)
+            constant = 2. / (1. + np.exp(-10 * p)) - 1  # 10 is gamma
+
             # make images variable
             images_src = make_variable(images_src)
             images_tgt = make_variable(images_tgt)
@@ -70,7 +74,7 @@ def train_tgt(src_encoder:nn.Module, tgt_encoder:nn.Module, critic,
             feat_concat = torch.cat((feat_src, feat_tgt), 0)
 
             # predict on discriminator
-            pred_concat = critic(feat_concat.detach())
+            pred_concat = critic(feat_concat.detach(), constant)  ########## CHECK: Add constant
 
             # prepare real and fake label
             # label_src = make_variable(torch.ones(feat_src.size(0)).long())
@@ -101,7 +105,7 @@ def train_tgt(src_encoder:nn.Module, tgt_encoder:nn.Module, critic,
             feat_tgt = tgt_encoder(images_tgt)
 
             # predict on discriminator
-            pred_tgt = critic(feat_tgt)
+            pred_tgt = critic(feat_tgt, constant)
 
             # prepare fake labels
             label_tgt = make_variable(torch.ones(feat_tgt.size(0)).long())

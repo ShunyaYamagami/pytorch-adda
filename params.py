@@ -44,14 +44,17 @@ image_size = 64
 
 if parent == 'Office31':
     num_classes = 31
+    num_domains = 2
     log_per_epoch = 10
     log_ckpt_per_epoch = 1000
 elif parent == 'OfficeHome':
     num_classes = 65
+    num_domains = 2
     log_per_epoch = 10
     log_ckpt_per_epoch = 1000
 elif parent == 'DomainNet':
     num_classes = 345
+    num_domains = 2
     log_per_epoch = 1
     log_ckpt_per_epoch = 200
 else:

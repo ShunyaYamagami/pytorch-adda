@@ -62,12 +62,12 @@ else:
 
 # log
 if resume:
-    log_dir = f'logs/{resume}'
+    log_dir = f'logs/DANN/{resume}'
 else:
     now = datetime.now().strftime("%y%m%d_%H:%M:%S")
     cuda = ''.join([str(i) for i in os.environ['CUDA_VISIBLE_DEVICES']])
     exec_num = os.environ['exec_num'] if 'exec_num' in os.environ.keys() else 0
-    log_dir  =  f'logs/{parent}/{now}--c{cuda}n{exec_num}--{dset}--{task}'
+    log_dir  =  f'logs/DANN/{parent}/{now}--c{cuda}n{exec_num}--{dset}--{task}'
 set_logger(log_dir)
 checkpoint_path = os.path.join(log_dir, 'latest.pth')
 

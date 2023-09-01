@@ -39,21 +39,21 @@ dataset_std_value = 0.5
 dataset_mean = (dataset_mean_value, dataset_mean_value, dataset_mean_value)
 dataset_std = (dataset_std_value, dataset_std_value, dataset_std_value)
 # batch_size = 50
-batch_size = 256
-image_size = 64
+batch_size = 32
+image_size = 255
 
 if parent == 'Office31':
     num_classes = 31
     log_per_epoch = 10
-    log_ckpt_per_epoch = 1000
+    log_ckpt_per_epoch = 500
 elif parent == 'OfficeHome':
     num_classes = 65
     log_per_epoch = 10
-    log_ckpt_per_epoch = 1000
+    log_ckpt_per_epoch = 500
 elif parent == 'DomainNet':
     num_classes = 345
     log_per_epoch = 1
-    log_ckpt_per_epoch = 200
+    log_ckpt_per_epoch = 50
 else:
     raise ValueError(f'parent: {parent}')
 
@@ -94,7 +94,7 @@ d_model_restore = ""
 
 # params for training network
 num_gpu = 1
-num_epochs_pre = 1
+num_epochs_pre = 100
 log_step_pre = 20
 eval_step_pre = 20
 save_step_pre = 100

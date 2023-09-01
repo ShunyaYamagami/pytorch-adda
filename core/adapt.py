@@ -144,12 +144,12 @@ def train_tgt(src_encoder:nn.Module, tgt_encoder:nn.Module, critic,
         #############################
         if ((epoch + 1) % params.log_ckpt_per_epoch == 0) or (epoch == params.num_epochs - 1):
             torch.save({
+                'epoch': epoch,
+                'best_acc': best_acc,
                 'src_encoder': src_encoder.state_dict(),
                 'tgt_encoder': tgt_encoder.state_dict(),
                 'optimizer_critic': optimizer_critic.state_dict(),
                 'optimizer_tgt': optimizer_tgt.state_dict(),
-                'epoch': epoch,
-                'best_acc': best_acc,
                 }, checkpoint_path)
 
     return tgt_encoder

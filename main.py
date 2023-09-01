@@ -13,10 +13,10 @@ if __name__ == '__main__':
     init_random_seed(params.manual_seed)
 
     # load dataset
-    src_data_loader = get_data_loader(params.parent, params.labeled_filename)
-    src_data_loader_eval = get_data_loader(params.parent, params.test0_filename, train=False)
-    tgt_data_loader = get_data_loader(params.parent, params.unlabeled_filename)
-    tgt_data_loader_eval = get_data_loader(params.parent, params.test1_filename, train=False)
+    src_data_loader = get_data_loader(params.parent, params.labeled_filename, params.image_size)
+    src_data_loader_eval = get_data_loader(params.parent, params.test0_filename, params.image_size, train=False)
+    tgt_data_loader = get_data_loader(params.parent, params.unlabeled_filename, params.image_size)
+    tgt_data_loader_eval = get_data_loader(params.parent, params.test1_filename, params.image_size, train=False)
 
     # load models
     src_encoder = init_model(net=LeNetEncoder(),

@@ -14,11 +14,12 @@ import params
 
 
 class OfficeDataset(data.Dataset):
-    def __init__(self, root, text_path, train=True, transform=None):
+    def __init__(self, root, text_path, image_size, train=True, transform=None):
         """Init USPS dataset."""
         # init params
         self.root = os.path.expanduser(root)
         self.text_path = text_path
+        self.image_size = image_size
         self.train = train
         # Num of Train = 7438, Num ot Test 1860
         self.transform = transform
@@ -54,7 +55,7 @@ class OfficeDataset(data.Dataset):
             lines = f.readlines()
             lines = np.array([l.split(' ') for l in lines], dtype=np.object_)
         paths = lines[:, 0]
-        image_list = [Image.open(os.path.join(self.root, p)).resize((64, 64)) for p in tqdm(paths)]
+        image_list = [Image.open(os.path.join(self.root, p)).resize((self.image_size, self.image_size)) for p in tqdm(paths)]
         images = np.array([np.array(im) for im in image_list])
         labels = lines[:, 1].astype(np.int32)
         domains = lines[:, 2].astype(np.int32)
@@ -63,7 +64,7 @@ class OfficeDataset(data.Dataset):
 
 
 
-def get_office(text_path, train):
+def get_office(text_path, image_size, train):
     """Get USPS dataset loader."""
     # image pre-processing
     pre_process = transforms.Compose([transforms.ToTensor(),
@@ -75,6 +76,7 @@ def get_office(text_path, train):
     usps_dataset = OfficeDataset(root=params.data_root,
                         train=train,
                         text_path=text_path,
+                        image_size=image_size,
                         transform=pre_process,)
 
     if train:

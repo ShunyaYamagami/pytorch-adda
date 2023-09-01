@@ -85,9 +85,8 @@ def train_tgt(src_encoder:nn.Module, tgt_encoder:nn.Module, critic,
             # optimize critic
             optimizer_critic.step()
 
-            pred_cls = torch.squeeze(pred_concat.max(1)[1])
-            # acc = (pred_cls == label_concat).float().mean()
-            accs = torch.cat([accs, (pred_cls == label_concat).long().cpu()])
+            # pred_cls = torch.squeeze(pred_concat.max(1)[1])
+            # accs = torch.cat([accs, (pred_cls == label_concat).long().cpu()])
 
             ############################
             # 2.2 train target encoder #
@@ -112,6 +111,16 @@ def train_tgt(src_encoder:nn.Module, tgt_encoder:nn.Module, critic,
 
             # optimize target encoder
             optimizer_tgt.step()
+
+            ############################
+            # Validation
+            ############################
+            with torch.no_grad():
+                feat_tgt = tgt_encoder(images_tgt)
+                pred_tgt = critic(feat_tgt)
+                pred_cls = torch.squeeze(pred_tgt.max(1)[1])
+                accs = torch.cat([accs, (pred_cls == label_tgt).long().cpu()])
+
 
         #######################
         # 2.3 print epoch info #

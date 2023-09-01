@@ -109,3 +109,4 @@ ENV/
 
 .vscode/
 logs/
+logs_prod/

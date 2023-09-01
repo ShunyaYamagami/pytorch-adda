@@ -57,18 +57,18 @@ def init_random_seed(manual_seed):
         torch.cuda.manual_seed_all(seed)
 
 
-def get_data_loader(name, text_path, train=True):
+def get_data_loader(name, text_path, image_size, train=True):
     """Get data loader by name."""
     if name == "MNIST":
         return get_mnist(train)
     elif name == "USPS":
         return get_usps(train)
     elif name == "Office31":
-        return get_office(text_path, train)
+        return get_office(text_path, image_size, train)
     elif name == "OfficeHome":
-        return get_office(text_path, train)
+        return get_office(text_path, image_size, train)
     elif name == "DomainNet":
-        return get_office(text_path, train)
+        return get_office(text_path, image_size, train)
 
 
 def init_model(net, restore):

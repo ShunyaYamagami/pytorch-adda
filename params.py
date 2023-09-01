@@ -39,7 +39,7 @@ dataset_std_value = 0.5
 dataset_mean = (dataset_mean_value, dataset_mean_value, dataset_mean_value)
 dataset_std = (dataset_std_value, dataset_std_value, dataset_std_value)
 # batch_size = 50
-batch_size = 12
+batch_size = 256
 image_size = 64
 
 if parent == 'Office31':
@@ -59,12 +59,12 @@ else:
 
 # log
 if resume:
-    log_dir = f'logs/{resume}'
+    log_dir = f'logs/ADDA/{resume}'
 else:
     now = datetime.now().strftime("%y%m%d_%H:%M:%S")
     cuda = ''.join([str(i) for i in os.environ['CUDA_VISIBLE_DEVICES']])
     exec_num = os.environ['exec_num'] if 'exec_num' in os.environ.keys() else 0
-    log_dir  =  f'logs/{parent}/{now}--c{cuda}n{exec_num}--{dset}--{task}'
+    log_dir  =  f'logs/ADDA/{parent}/{now}--c{cuda}n{exec_num}--{dset}--{task}'
 set_logger(log_dir)
 checkpoint_path = os.path.join(log_dir, 'latest.pth')
 
@@ -94,7 +94,7 @@ d_model_restore = ""
 
 # params for training network
 num_gpu = 1
-num_epochs_pre = 100
+num_epochs_pre = 1
 log_step_pre = 20
 eval_step_pre = 20
 save_step_pre = 100

@@ -7,7 +7,7 @@ from torch import nn
 class LeNetEncoder(nn.Module):
     """LeNet encoder model for ADDA."""
 
-    def __init__(self):
+    def __init__(self, img_size):
         """Init LeNet encoder."""
         super(LeNetEncoder, self).__init__()
 
@@ -31,7 +31,14 @@ class LeNetEncoder(nn.Module):
         )
         # self.fc1 = nn.Linear(50 * 4 * 4, 500)
         # self.fc1 = nn.Linear(50 * 61 * 61, 500)
-        self.fc1 = nn.Linear(8450, 500)
+
+        if img_size ==64:
+            dim = 8450
+        elif img_size == 255:
+            dim = 180000
+        else:
+            raise ValueError(f'img_size: {img_size}')
+        self.fc1 = nn.Linear(dim, 500)
 
     def forward(self, input):
         """Forward the LeNet."""

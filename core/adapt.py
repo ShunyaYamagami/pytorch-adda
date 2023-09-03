@@ -7,12 +7,13 @@ import torch.optim as optim
 from torch import nn
 from tqdm import tqdm
 
+from core.test import eval_tgt
 import params
 from utils import make_variable
 import logging
 logger = logging.getLogger(__name__)
 
-def train_tgt(src_encoder:nn.Module, tgt_encoder:nn.Module, critic,
+def train_tgt(src_encoder:nn.Module, tgt_encoder:nn.Module, src_classifier:nn.Module, critic:nn.Module,
               src_data_loader, tgt_data_loader, checkpoint_path, resume=''):
     """Train encoder for target domain."""
     ####################
@@ -42,6 +43,7 @@ def train_tgt(src_encoder:nn.Module, tgt_encoder:nn.Module, critic,
     if resume:
         checkpoints = torch.load(checkpoint_path)
         src_encoder.load_state_dict(checkpoints['src_encoder'])
+        src_classifier.load_state_dict(checkpoints['src_classifier'])
         tgt_encoder.load_state_dict(checkpoints['tgt_encoder'])
         optimizer_critic.load_state_dict(checkpoints['optimizer_critic'])
         optimizer_tgt.load_state_dict(checkpoints['optimizer_tgt'])
@@ -50,7 +52,6 @@ def train_tgt(src_encoder:nn.Module, tgt_encoder:nn.Module, critic,
 
     for epoch in tqdm(range(start_epoch, params.num_epochs)):
         # zip source and target data pair
-        accs = torch.Tensor()
         data_zip = enumerate(zip(src_data_loader, tgt_data_loader))
         for step, ((images_src, _, domain_src), (images_tgt, _, domain_tgt)) in data_zip:
             ###########################
@@ -103,7 +104,7 @@ def train_tgt(src_encoder:nn.Module, tgt_encoder:nn.Module, critic,
             pred_tgt = critic(feat_tgt)
 
             # prepare fake labels
-            label_tgt = make_variable(torch.ones(feat_tgt.size(0)).long())
+            label_tgt = make_variable(domain_tgt.squeeze_().long())
 
             # compute loss for target encoder
             loss_tgt = criterion(pred_tgt, label_tgt)
@@ -112,26 +113,16 @@ def train_tgt(src_encoder:nn.Module, tgt_encoder:nn.Module, critic,
             # optimize target encoder
             optimizer_tgt.step()
 
-            ############################
-            # Validation
-            ############################
-            with torch.no_grad():
-                feat_tgt = tgt_encoder(images_tgt)
-                pred_tgt = critic(feat_tgt)
-                pred_cls = torch.squeeze(pred_tgt.max(1)[1])
-                accs = torch.cat([accs, (pred_cls == label_tgt).long().cpu()])
-
-
-        #######################
-        # 2.3 print epoch info #
-        #######################
-        acc_epoch = torch.mean(accs)
-        acc_epoch = round(float(acc_epoch), 3)
-        if best_acc < acc_epoch:
-            best_acc = acc_epoch
-            with open(os.path.join(params.log_dir, 'best.txt'), 'w') as f:
-                f.write(f'Epoch: {epoch}  {best_acc:.3f}')
+        ############################
+        # Validation
+        ############################
         if ((epoch + 1) % params.log_per_epoch == 0):
+            acc_epoch = eval_tgt(tgt_encoder, src_classifier, tgt_data_loader)
+            acc_epoch = round(float(acc_epoch), 3)
+            if best_acc < acc_epoch:
+                best_acc = acc_epoch
+                with open(os.path.join(params.log_dir, 'best.txt'), 'w') as f:
+                    f.write(f'Epoch: {epoch}  {best_acc:.3f}')
             logger.info("Epoch [{:4d}/{:4d}] \td_loss={:.3}\tg_loss={:.3} \tacc={:.3f}"
                     .format(epoch + 1,
                             params.num_epochs,
@@ -147,6 +138,7 @@ def train_tgt(src_encoder:nn.Module, tgt_encoder:nn.Module, critic,
                 'epoch': epoch,
                 'best_acc': best_acc,
                 'src_encoder': src_encoder.state_dict(),
+                'src_classifier': src_classifier.state_dict(),
                 'tgt_encoder': tgt_encoder.state_dict(),
                 'optimizer_critic': optimizer_critic.state_dict(),
                 'optimizer_tgt': optimizer_tgt.state_dict(),

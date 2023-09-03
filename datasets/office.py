@@ -92,6 +92,6 @@ def get_office(text_path, image_size, train):
         usps_data_loader = torch.utils.data.DataLoader(
             dataset=usps_dataset,
             batch_size=params.batch_size,
-            shuffle=True)
+            shuffle=False)
 
     return usps_data_loader

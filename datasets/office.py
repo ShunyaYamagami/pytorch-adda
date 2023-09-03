@@ -9,6 +9,7 @@ import torch.utils.data as data
 from torchvision import datasets, transforms
 from PIL import Image
 from tqdm import tqdm
+from concurrent.futures import ThreadPoolExecutor
 
 import params
 
@@ -55,7 +56,9 @@ class OfficeDataset(data.Dataset):
             lines = f.readlines()
             lines = np.array([l.split(' ') for l in lines], dtype=np.object_)
         paths = lines[:, 0]
-        image_list = [Image.open(os.path.join(self.root, p)).resize((self.image_size, self.image_size)) for p in tqdm(paths)]
+
+        with ThreadPoolExecutor(max_workers=16) as executor:
+            image_list = [Image.open(os.path.join(self.root, p)).resize((self.image_size, self.image_size)) for p in tqdm(paths)]
         images = np.array([np.array(im) for im in image_list])
         labels = lines[:, 1].astype(np.int32)
         domains = lines[:, 2].astype(np.int32)

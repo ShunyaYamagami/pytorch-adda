@@ -76,7 +76,7 @@ function process_args {
     if [ $parent = 'Office31' ]; then
         dsetlist=("amazon_dslr" "webcam_amazon" "dslr_webcam")
     elif [ $parent = 'OfficeHome' ]; then
-        dsetlist=('Clipart_Art' 'Product_Art' 'Product_Clipart' 'RealWorld_Art' 'RealWorld_Clipart' 'RealWorld_Product')
+        dsetlist=('Art_Clipart' 'Art_Product' 'Art_RealWorld' 'Clipart_Product' 'Clipart_RealWorld' 'Product_RealWorld')
     elif [ $parent = 'DomainNet' ]; then
         dsetlist=('clipart_infograph' 'clipart_painting' 'clipart_quickdraw' 'clipart_real' 'clipart_sketch' 'infograph_painting' 'infograph_quickdraw' 'infograph_real' 'infograph_sketch' 'painting_quickdraw' 'painting_real' 'painting_sketch' 'quickdraw_real' 'quickdraw_sketch' 'real_sketch')
     else
